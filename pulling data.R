@@ -32,6 +32,7 @@ acs5 <- left_join(acs5,var_desc,by=c("vars"="X1"))
 
 var_freq <- acs5 %>% group_by(vars) %>% summarize(length(vars))
 
+
 ##Age
 age_vars <- grep("B01001_",acs5$vars)
 acs5_age_vars <- acs5[age_vars,10]
@@ -42,12 +43,19 @@ acs5_age <- data.frame(year= 2009, getCensus(name="acs/acs5",
                                  vars = age_var_names,
                                  key=key,
                                  region = "county:*"))
-for (i in 2010:2019){
-acs5_age <- rbind(acs5_age, data.frame(year = i, getCensus(name="acs/acs5",
-                      vintage=i,
-                     vars = age_var_names,
-                     key=key,
-                     region = "county:*")))
+for (i in 2009:2019){
+  for (j in 1:51){
+    acs5_age <- rbind(acs5_age, data.frame(year = i, 
+                                             getCensus(name="acs/acs5",
+                                                       vintage=i,
+                                                       vars = age_var_names,
+                                                       key=key,
+                                                       region = "tract:*",
+                                                       regionin = paste0("state:",unique(fips_codes$state_code)[j])
+                                             )
+    )
+    )
+  }
 }
 
 #unique(var_desc[var_desc$X1%in%age_var_names,])
@@ -67,19 +75,31 @@ names(age_small) <- c("year","state","county","total","male","female","over 65 m
 
 ## Race
 race_vars <- c("B01001A_001E","B01001B_001E","B01001C_001E","B01001D_001E","B01001E_001E","B01001F_001E","B01001G_001E","B01001H_001E","B01001I_001E")
-
-acs5_race <- data.frame(year = 2009, getCensus(name="acs/acs5",
+acs5_race <- data.frame()
+for (i in 1:10){
+acs5_race <- rbind(acs5_race, data.frame(year = 2009, getCensus(name="acs/acs5",
                       vintage=2009,
                       vars = race_vars,
                       key=key,
-                      region = "county:*"))
-for (i in 2010:2019){
-  acs5_race <- rbind(acs5_race, data.frame(year = i, getCensus(name="acs/acs5",
+                      region = "tract:*",
+                      regionin = paste0("state:",unique(fips_codes$state_code)[i]))))
+}
+
+#loop doesnt work (years)
+for (i in 2009:2019){
+  for (j in 1:51){
+  acs5_race <- rbind(acs5_race, data.frame(year = i, 
+                                           getCensus(name="acs/acs5",
                                                              vintage=i,
                                                              vars = race_vars,
                                                              key=key,
-                                                             region = "county:*")))
-}
+                                                             region = "tract:*",
+                                                             regionin = paste0("state:",unique(fips_codes$state_code)[j])
+                                                     )
+                                           )
+                     )
+  }
+  }
 
 names(acs5_race) <- c("year","state","county",
                       "white alone",
@@ -97,7 +117,24 @@ names(acs5_race) <- c("year","state","county",
 #B02008:14 introduces combinations (expansion of two or more category)
 
 ##Educational attainment
-ed_vars <- grep("EDUCATION",var_desc$X3)
+ed_vars <- var_desc[grep("EDUCATION",var_desc$X3),]
+ed_vars <- c(paste0("B15003_00",2:9,"E"),paste0("B15003_0",10:25,"E"))
+
+acs5_education <- data.frame()
+for (i in 2009:2019){
+  for (j in 1:51){
+    acs5_education <- rbind(acs5_education, data.frame(year = i, 
+                                             getCensus(name="acs/acs5",
+                                                       vintage=i,
+                                                       vars = ed_vars,
+                                                       key=key,
+                                                       region = "tract:*",
+                                                       regionin = paste0("state:",unique(fips_codes$state_code)[j])
+                                             )
+    )
+    )
+  }
+}
 
 ##Households (emmuneration)
 
