@@ -3,6 +3,7 @@ library(tidycensus)
 library(censusapi)
 library(jsonlite)
 varstuff <- fromJSON("https://api.census.gov/data/2019/acs/acs5/variables.json")
+#Very useful to scroll through variables at the acs api via the website as well 
 
 var_desc <- data.frame(stringsAsFactors = FALSE,matrix(ncol=3,nrow=1))
 for (i in 4:length(varstuff$variables)){
@@ -38,11 +39,11 @@ age_vars <- grep("B01001_",acs5$vars)
 acs5_age_vars <- acs5[age_vars,10]
 acs5_age_vars <- as.character(acs5_age_vars)
 age_var_names <- unique(acs5_age_vars)
-acs5_age <- data.frame(year= 2009, getCensus(name="acs/acs5",
-                                 vintage=2009,
-                                 vars = age_var_names,
-                                 key=key,
-                                 region = "county:*"))
+# acs5_age <- data.frame(year= 2009, getCensus(name="acs/acs5",
+#                                  vintage=2009,
+#                                  vars = age_var_names,
+#                                  key=key,
+#                                  region = "county:*"))
 for (i in 2009:2019){
   for (j in 1:51){
     acs5_age <- rbind(acs5_age, data.frame(year = i, 
