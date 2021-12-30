@@ -71,8 +71,8 @@ age_small <- acs5_age %>%
                      over65f=B01001_044E+B01001_045E+B01001_046E+B01001_047E+B01001_048E+B01001_049E,
                      under21m=B01001_003E+B01001_004E+B01001_005E+B01001_006E+B01001_007E+B01001_008E+B01001_009E,
                      under21f=B01001_027E+B01001_028E+B01001_029E+B01001_030E+B01001_031E+B01001_032E+B01001_033E) %>%
-  select("year","state","county","B01001_001E","B01001_002E","B01001_026E",over65m,over65f,under21m,under21f)
-names(age_small) <- c("year","state","county","total","male","female","over 65 male", "over 65 female","under 21 male", "under 21 female")
+  select("year","state","county","tract","B01001_001E","B01001_002E","B01001_026E",over65m,over65f,under21m,under21f)
+names(age_small) <- c("year","state","county","tract","total","male","female","over 65 male", "over 65 female","under 21 male", "under 21 female")
 
 ## Race
 race_vars <- c("B01001A_001E","B01001B_001E","B01001C_001E","B01001D_001E","B01001E_001E","B01001F_001E","B01001G_001E","B01001H_001E","B01001I_001E")
@@ -102,7 +102,7 @@ for (i in 2009:2019){
   }
   }
 
-names(acs5_race) <- c("year","state","county",
+names(acs5_race) <- c("year","state","county", "tract",
                       "white alone",
                       "black alone",
                       "american indian or alaska native alone",
@@ -119,15 +119,15 @@ names(acs5_race) <- c("year","state","county",
 
 ##Educational attainment
 ed_vars <- var_desc[grep("EDUCATION",var_desc$X3),]
-ed_vars <- c(paste0("B15003_00",2:9,"E"),paste0("B15003_0",10:25,"E"))
-
+ed_vars2016 <- c(paste0("B15003_00",2:9,"E"),paste0("B15003_0",10:25,"E"))
+ed_vars2009 <- "B15001_001E"
 acs5_education <- data.frame()
 for (i in 2009:2019){
   for (j in 1:51){
     acs5_education <- rbind(acs5_education, data.frame(year = i, 
                                              getCensus(name="acs/acs5",
                                                        vintage=i,
-                                                       vars = ed_vars,
+                                                       vars = ed_vars2016,
                                                        key=key,
                                                        region = "tract:*",
                                                        regionin = paste0("state:",unique(fips_codes$state_code)[j])
@@ -136,6 +136,18 @@ for (i in 2009:2019){
     )
   }
 }
+
+
+ed_small <- acs5_education %>% 
+  mutate(noschooling=B15003_002E,
+         primaryschoolnodiploma = B15003_003E+ B15003_004E+B15003_005E+B15003_006E+B15003_007E+B15003_008E+B15003_009E+B15003_010E+B15003_011E+B15003_012E+B15003_013E+B15003_014E
+         + B15003_015E+B15003_016E,
+         highschooldiploma= B15003_017E,
+         somecollegenodegree= B15003_019E+B15003_020E
+         ) %>%
+  select("year","state","county","tract",noschooling,primaryschoolnodiploma,highschooldiploma,somecollegenodegree,B15003_021E,B15003_022E,B15003_023E,B15003_024E,B15003_025E)
+names(ed_small) <- c("year","state","county","tract","noschooling","primaryschoolnodiploma","highschooldiploma","somecollegenodegree","associatesdegree","bachelorsdegree","masters degree","professionaldegree","doctoratedegree")
+
 
 ##Households (emmuneration)
 
